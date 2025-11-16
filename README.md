@@ -12,7 +12,7 @@ Table Schemas:
 
 Repertoire:
 |Field |	Type |	Notes |
-| :------: | ------| ------| 
+| :------: | :------: | ------| 
 | repertoire_category	| text	| Category indicator (see key) |
 | serial_number	| integer	| The order number within the category |
 | title	| text	| Name of the piece |
@@ -29,7 +29,7 @@ Repertoire:
 
 Performance:
 | Field	| Type	| Notes |
-|:----------:| --------| ----- |
+|:----------:| :--------: | ----- |
 | date	| date	| Performance date |
 | occasion	| text	| name of the event |
 | piece_title	| text	| name of a piece song |
