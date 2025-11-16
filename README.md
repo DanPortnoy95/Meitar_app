@@ -7,7 +7,8 @@ Since 2014, I have worked as assistant conductor at the "Meitar" children's choi
 The choir's library and catalog that we inherited from the founder conductor of the choir, Mrs. Yehudit Chen (Z"L), was a printed copy of a file on her computer (that is no longer available to us) with some handwritten additions. Already at the time we inherited it, it was outdated and missing newer entries. This made recording the new pieces we added to the repertoire even more messy and inconsistent. Being able to manage, add, and search for the piece_ID (and therefore the location of the music sheets in the physical library) would be much easier with an app.
 Another problem this app is intended to solve for us is facilitating the search of pieces in the choir's repertoire (by title, composer, language, and so on).
 
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++
+
 Table Schemas:
 
 Repertoire:
