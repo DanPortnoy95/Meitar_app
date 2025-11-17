@@ -14,7 +14,7 @@ Table Schemas:
 Repertoire:
 |Field |	Type |	Notes |
 | :------: | :------: | ------| 
-| repertoire_category	| text	| Category indicator (see key) |
+| category	| text	| Category indicator (see key) |
 | serial_number	| integer	| The order number within the category |
 | title	| text	| Name of the piece |
 | composer |	text |	Cannot be null. Use “Anonymous” if unknown. |
