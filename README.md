@@ -35,5 +35,5 @@ Performance:
 | occasion	| text	| name of the event |
 | piece_title	| text	| name of a piece song |
 | piece_serial (UID)	| text | (foreign key to Repertoire)	Repertoire.category + serial_number |
-| order_in_program	| integer	| the sequence of the pieces as performed |
+| performance_order	| integer	| the sequence of the pieces as performed |
 | estimated_time	| time | duration of the piece in seconds or minutes | 

@@ -56,20 +56,18 @@ if page == "חיפוש ברפרטואר":
         search_text = st.text_input("טקסט לחיפוש:")
     with col2:
         all_cats = ["הכל"] + df_rep['category_name'].dropna().unique().tolist()
+        search_by = ["הכל", "category", "serial", "title", "composer", "arranger", "lyrics", "translator", "language",
+                     "voicing", "instruments"]
         selected_cat = st.selectbox("סנן לפי קטגוריה:", all_cats)
-        filter_by = st.radio("חפש לפי:", ['uid', 'title', 'composer', 'arranger', 'lyrics', 'translator', 'language', 'voicing', 'accompanied', 'instruments'] )
         
         # Dynamically get columns to avoid KeyError, excluding the category description
         searchable_columns = [col for col in df_rep.columns if col != 'category_name']
-        filter_by = st.radio("חפש לפי:", searchable_columns)
+        filter_by = st.selectbox("חפש לפי עמודה:", selected_cat if selected_cat != "הכל" else searchable_columns)
     
     filtered_df = df_rep.copy()
     if search_text:
         # Search by user input
-        filtered_df = filtered_df[
-            filtered_df[filter_by].str.contains(search_text, case=False, na=False)
-            filtered_df[filter_by].astype(str).str.contains(search_text, case=False, na=False)
-        ]
+        filtered_df = filtered_df[filtered_df[filter_by].astype(str).str.contains(search_text, case=False, na=False)]
     if selected_cat != "הכל":
         filtered_df = filtered_df[filtered_df['category_name'] == selected_cat]
 
@@ -79,3 +77,40 @@ if page == "חיפוש ברפרטואר":
     else:
         st.write(f"נמצאו {len(filtered_df)} יצירות:")
         st.dataframe(filtered_df, use_container_width=True)
+
+elif page == "ניתוח הופעות וסטטיסטיקה":
+    st.header("📊 ניתוח הופעות וסטטיסטיקה")
+
+    df_perf = load_performance()
+    # Ensure date is datetime for filtering
+    df_perf['date'] = pd.to_datetime(df_perf['date'], errors='coerce', dayfirst=True)
+
+    # Time range selection
+    st.subheader("פופולריות יצירות")
+    time_range = st.radio(
+        "בחר טווח זמן:",
+        ["הכל", "5 שנים אחרונות", "3 שנים אחרונות"],
+        horizontal=True
+    )
+
+    # Apply time filter
+    current_year = pd.Timestamp.now().year
+    if time_range == "5 שנים אחרונות":
+        df_perf = df_perf[df_perf['date'].dt.year >= (current_year - 5)]
+    elif time_range == "3 שנים אחרונות":
+        df_perf = df_perf[df_perf['date'].dt.year >= (current_year - 3)]
+
+    if df_perf.empty:
+        st.info("אין נתוני הופעות לטווח הזמן הנבחר.")
+    else:
+        # Calculate most popular pieces
+        top_pieces = df_perf['piece_title'].value_counts().reset_index()
+        top_pieces.columns = ['piece_title', 'count']
+
+        # Create Histogram (Bar chart of counts)
+        fig = px.bar(top_pieces.head(10), x='count', y='piece_title', orientation='h',
+                     title=f"10 היצירות המבוצעות ביותר ({time_range})",
+                     labels={'count': 'מספר ביצועים', 'piece_title': 'שם היצירה'},
+                     template="plotly_white")
+        fig.update_layout(yaxis={'categoryorder': 'total ascending'})
+        st.plotly_chart(fig, use_container_width=True)
