@@ -31,16 +31,23 @@ def load_repertoire():
 @st.cache_data
 def load_performance():
     conn = db_connect()
-    # querying the whole performance table
-    # This should be cleaned and done with joining to the repertoire table, but need to figure a break case of piece performed that was not included in the repertoire.
+    # Querying the performance table and joining with repertoire data.
+    # A LEFT JOIN ensures all performances are included, even if the piece
+    # is not (or no longer) in the Repertoire table.
     query = """
     SELECT 
-        *
+        p.date,
+        p.occasion,
+        p.piece_title,
+        p.performance_order,
+        r.composer,
+        r.arranger,
+        r.language
     FROM Performance p
+    LEFT JOIN Repertoire r ON p.uid = (r.category || CAST(r.serial AS VARCHAR))
     ORDER BY p.date DESC, p.performance_order ASC;
     """
     return conn.execute(query).df()
-
 # Side-bar 
 st.sidebar.title("🎶 מקהלת מיתר")
 page = st.sidebar.radio("ניווט:", ["חיפוש ברפרטואר", "ניתוח הופעות וסטטיסטיקה"])
@@ -86,7 +93,7 @@ elif page == "ניתוח הופעות וסטטיסטיקה":
     df_perf['date'] = pd.to_datetime(df_perf['date'], errors='coerce', dayfirst=True)
 
     # Time range selection
-    st.subheader("פופולריות יצירות")
+    st.subheader("יצירות פופולריות")
     time_range = st.radio(
         "בחר טווח זמן:",
         ["הכל", "5 שנים אחרונות", "3 שנים אחרונות"],
@@ -108,9 +115,27 @@ elif page == "ניתוח הופעות וסטטיסטיקה":
         top_pieces.columns = ['piece_title', 'count']
 
         # Create Histogram (Bar chart of counts)
-        fig = px.bar(top_pieces.head(10), x='count', y='piece_title', orientation='h',
+        fig1 = px.bar(top_pieces.head(10), x='count', y='piece_title', orientation='h',
                      title=f"10 היצירות המבוצעות ביותר ({time_range})",
                      labels={'count': 'מספר ביצועים', 'piece_title': 'שם היצירה'},
                      template="plotly_white")
-        fig.update_layout(yaxis={'categoryorder': 'total ascending'})
-        st.plotly_chart(fig, use_container_width=True)
+        fig1.update_layout(yaxis={'categoryorder': 'total ascending'})
+        st.plotly_chart(fig1, use_container_width=True)
+
+    # Number of languages in a performance
+    st.subheader("מספר שפות בתוכנית")
+    # The 'language' column is now available directly in df_perf thanks to the SQL JOIN.
+    # The merge is no longer needed.
+    lang_count = df_perf.groupby('date')['language'].nunique().reset_index()
+    # Visualize languages per performance
+    fig2 = px.bar(lang_count, x='date', y='language',
+                   title="מספר שפות בתוכנית",
+                   labels={'date': 'תאריך הופעה', 'language': 'מספר שפות'},
+                   template="plotly_white")
+    fig2.update_yaxes(dtick=1)
+    fig2.update_xaxes(
+        tickmode='array',
+        tickvals=lang_count['date'],
+        tickformat="%Y-%m",
+        tickangle=-45)
+    st.plotly_chart(fig2, use_container_width=True)
